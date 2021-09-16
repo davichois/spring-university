@@ -1,12 +1,12 @@
 package upeu.edu.pe.employees.entity;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Date;
 
 
 @Entity
 @Table(name = "employees")
-public class Employees {
+public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +41,6 @@ public class Employees {
 
     @Column(name = "departament_id")
     private Integer departamentId;
-
-    private Boolean estado;
 
 
     public Integer getIdEmployees() {
@@ -133,11 +131,4 @@ public class Employees {
         this.departamentId = departamentId;
     }
 
-    public Boolean getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Boolean estado) {
-        this.estado = estado;
-    }
 }
