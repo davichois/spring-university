@@ -22,24 +22,14 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @GetMapping("/")
-    public List<Employee> show() {
-        return employeeService.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> showOne(@PathVariable("id") Integer id){
-        Employee employee = null;
+    public ResponseEntity<?> show() {
         Map<String, Object> response = new HashMap<>();
-
         try {
-            employee = this.employeeService.findById(id);
-
-            if (employee == null){
-                response.put("message", "El empleado con ID: " + id.toString() + " no existe en la Base de datos.");
-                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-            }
-
-            return new ResponseEntity<Employee>(employee, HttpStatus.OK);
+            List<Employee> employees = employeeService.findAll();
+            response.put("message", "success");
+            response.put("error", "false");
+            response.put("body", employees);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
         }catch (DataAccessException e){
             response.put("message", "Error al realizar la consulta");
             response.put("error", e.getMessage());
@@ -47,16 +37,85 @@ public class EmployeeController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> showOne(@PathVariable("id") Integer id){
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Employee employee = this.employeeService.findById(id);
+
+            if (employee == null){
+                response.put("message", "El empleado con ID: " + id.toString() + " no existe en la Base de datos.");
+                response.put("error", "true");
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+
+            response.put("message", "success");
+            response.put("error", "false");
+            response.put("body", employee);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+        } catch (DataAccessException e){
+            response.put("message", "Error al realizar la consulta");
+            response.put("error", e.getMessage());
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/")
-    public Integer createEmployee(@RequestBody Employee employee){
-        employeeService.createOrUpdate(employee);
-        return employee.getIdEmployees();
+    public ResponseEntity<?>  createEmployee(@RequestBody Employee employee){
+        Map<String, Object> response = new HashMap<>();
+        try {
+
+            if (employee == null){
+                response.put("message", "more content");
+                response.put("error", "true");
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NO_CONTENT);
+            }
+
+            employeeService.createOrUpdate(employee);
+            response.put("message", "created user correct");
+            response.put("error", "false");
+            response.put("body", employee);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+
+        }catch (DataAccessException e){
+            response.put("message", "Error al realizar la consulta");
+            response.put("error", e.getMessage());
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/employee/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Employee update(@RequestBody Employee employee, @PathVariable Integer id) {
+        Employee employeeCurrent = this.employeeService.findById(id);
+        employeeCurrent.setFirstName(employee.getFirstName());
+        employeeCurrent.setLastName(employee.getLastName());
+        this.employeeService.createOrUpdate(employeeCurrent);
+        return employeeCurrent;
     }
 
     @DeleteMapping("/{id}")
-    public String deleteEmployee(@PathVariable("id") Integer id){
-        employeeService.delete(id);
-        return "Eliminado correctamente";
+    public ResponseEntity<?>  deleteEmployee(@PathVariable("id") Integer id){
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Employee employee = this.employeeService.findById(id);
+
+            if (employee == null){
+                response.put("message", "El empleado con ID: " + id.toString() + " no existe en la Base de datos.");
+                response.put("error", "true");
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+
+            employeeService.delete(id);
+            response.put("message", "user delete success");
+            response.put("error", "false");
+            response.put("body", employee);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+        }catch (DataAccessException e){
+            response.put("message", "Error al realizar la consulta");
+            response.put("error", e.getMessage());
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
